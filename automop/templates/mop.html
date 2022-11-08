@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Mop{% endblock %}
+
+{% block content %}
+<h3>{{mop_status}}</h3>
+<table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+    <thead>
+        <tr>
+            <th class="mdl-data-table__cell--non-numeric">Workspace Namespace</th>
+            <th class="mdl-data-table__cell--non-numeric">Workspace Name</th>
+            <th class="mdl-data-table__cell--non-numeric">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in mop_results %}
+            <tr>
+                <td class="mdl-data-table__cell--non-numeric">{{item.workspace_namespace}}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{item.workspace_name}}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{item.status}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
