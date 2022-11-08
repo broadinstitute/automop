@@ -12,6 +12,7 @@ import google.auth
 import firecloud.api as fapi
 import webbrowser
 import threading
+import os
 
 
 app = flask.Flask(__name__)
@@ -114,7 +115,7 @@ def open_browser():
     webbrowser.open_new('http://127.0.0.1:8080')
 
 def main():
-    with open('secrets.json') as secrets_file:
+    with open(os.path.join(app.root_path, 'secrets.json')) as secrets_file:
         secret_data = json.load(secrets_file)
     app.secret_key = secret_data['flask_secret_key']
     threading.Timer(2, open_browser).start()
