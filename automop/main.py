@@ -13,9 +13,13 @@ import firecloud.api as fapi
 import webbrowser
 import threading
 import os
+import subprocess
 
 
 app = flask.Flask(__name__)
+
+class ShutdownException(RuntimeError):
+    pass
 
 def get_user_email():
     authorized_session = AuthorizedSession(google.auth.default(['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'])[0])
@@ -29,7 +33,7 @@ def index():
     except:
         return render_template('error.html', error_message=Markup(
             'Something went wrong verifying your Google credentials. Make sure you have valid <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a>, ' +
-            'usually this done by running <pre>gcloud auth application-default login</pre>.'))
+            'usually this done by running <pre>gcloud auth application-default login</pre> in your terminal.'))
     return redirect('/workspaces')
 
 def get_workspace_cost(workspace):
@@ -111,15 +115,36 @@ async def mop():
         mop_results.append({'workspace_namespace': workspaces_to_mop[i][0], 'workspace_name': workspaces_to_mop[i][1], 'status': submission_results[i]})
     return render_template('mop.html', mop_status='All mop jobs submitted successfully.' if all_ok else 'There have been errors submitting the mop jobs:', mop_results=mop_results)
 
+
+@app.route('/stop')
+def stop():
+    raise ShutdownException('stop')
+
+@app.route('/stop_and_delete')
+def stop_and_delete():
+    raise ShutdownException('stop_and_delete')
+
 def open_browser():
     webbrowser.open_new('http://127.0.0.1:8080')
+
+def schedule_delete_directory():
+    subprocess.run(f'sleep 1 && cd "{os.path.dirname(os.path.realpath(__file__))}/../.." && mv automop automop2')
 
 def main():
     with open(os.path.join(app.root_path, 'secrets.json')) as secrets_file:
         secret_data = json.load(secrets_file)
     app.secret_key = secret_data['flask_secret_key']
     threading.Timer(2, open_browser).start()
-    app.run('localhost', 8080, debug=True)
+    try:
+        app.run('localhost', 8080, debug=True)
+    except ShutdownException as e:
+        if str(e) == 'stop':
+            return
+        elif str(e) == 'stop_and_delete':
+            schedule_delete_directory()
+            return
+        else:
+            raise e
 
 if __name__ == '__main__':
     main()
