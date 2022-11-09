@@ -40,7 +40,11 @@ def index():
     return redirect('/workspaces')
 
 def get_workspace_cost(workspace):
-    return fapi.get_storage_cost(workspace[0], workspace[1]).json()['estimate']
+    result = fapi.get_storage_cost(workspace[0], workspace[1])
+    if not result.ok:
+        app.logger.error(f'Failed to get workspace cost for {workspace[0]}/{workspace[1]}: {result.json()["message"]}')
+        return result.json()['message']
+    return result.json()['estimate']
 
 @app.route('/get_workspaces')
 async def get_workspaces():
@@ -66,7 +70,6 @@ def workspaces():
     return render_template('workspaces.html', user=session['user'])
 
 def submit_automop_job(workspace, user):
-    return 'OK'
     workspace_namespace = workspace[0]
     workspace_name = workspace[1]
     method = {
