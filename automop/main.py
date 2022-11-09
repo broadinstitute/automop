@@ -43,7 +43,7 @@ def get_workspace_cost(workspace):
     result = fapi.get_storage_cost(workspace[0], workspace[1])
     if not result.ok:
         app.logger.error(f'Failed to get workspace cost for {workspace[0]}/{workspace[1]}: {result.json()["message"]}')
-        return result.json()['message']
+        return 'N/A'
     return result.json()['estimate']
 
 @app.route('/get_workspaces')
@@ -60,7 +60,7 @@ async def get_workspaces():
     
     workspaces_json = [{'namespace': writer_workspaces[i][0], 'name': writer_workspaces[i][1], 'cost': workspace_costs[i]} for i in range(len(writer_workspaces))]
     
-    return jsonify(sorted(workspaces_json, key=lambda workspace: float(workspace['cost'][1:])))
+    return jsonify(sorted(workspaces_json, key=lambda workspace: float('+inf') if workspace['cost'] == 'N/A' else float(workspace['cost'][1:])))
 
 @app.route('/workspaces')
 def workspaces():
