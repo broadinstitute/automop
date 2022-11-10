@@ -120,22 +120,10 @@ async def mop():
         if submission_results[i] != 'OK':
             all_ok = False
         mop_results.append({'workspace_namespace': workspaces_to_mop[i][0], 'workspace_name': workspaces_to_mop[i][1], 'status': submission_results[i]})
-    return render_template('mop.html', mop_status='All mop jobs submitted successfully.' if all_ok else 'There have been errors submitting the mop jobs:', mop_results=mop_results)
-
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-@app.route('/stop')
-def stop():
-    shutdown_server()
-
-@app.route('/stop_and_delete')
-def stop_and_delete():
-    subprocess.Popen(f'sleep 1 && cd "{os.path.dirname(os.path.realpath(__file__))}/../.." && touch it_worked.txt', shell=True)
-    shutdown_server()
+    if all_ok:
+        return render_template('mop.html', mop_status='All mop jobs submitted successfully.', finished_message=Markup('<p>You can now close this tab and terminate the app by pressing <code>Control + C</code> in the command line.</p>'), mop_results=mop_results)
+    else:
+        return render_template('mop.html', mop_status='There have been errors submitting the mop jobs:', finished_message=Markup('If the cause is not obvious, please send the error messages shown below to <a href="mailto:mgatzen@broadinstitute.org">mgatzen@broadinstitute.org</a>.'), mop_results=mop_results)
 
 def open_browser():
     webbrowser.open_new('http://127.0.0.1:8080')
@@ -144,8 +132,8 @@ def main():
     with open(os.path.join(app.root_path, 'secrets.json')) as secrets_file:
         secret_data = json.load(secrets_file)
     app.secret_key = secret_data['flask_secret_key']
-    threading.Timer(2, open_browser).start()
-    app.run('localhost', 8080, debug=True)
+    threading.Timer(1, open_browser).start()
+    app.run('localhost', 8080, debug=True, use_reloader=False)
 
 if __name__ == '__main__':
     main()
