@@ -271,7 +271,7 @@ EOF
     runtime {
         docker: "us.gcr.io/broad-dsde-methods/automop:0.1"
         preemptible: 0
-        memory: "2 GB"
+        memory: "16 GB"
         disks: "local-disk 20 HDD"
     }
     output {

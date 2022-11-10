@@ -75,9 +75,9 @@ def submit_automop_job(workspace, user):
     method = {
         'methodRepoMethod': {
             'methodName': 'Automop',
-            'methodVersion': 5,
+            'methodVersion': 6,
             'methodNamespace': 'DSPMethods_mgatzen',
-            'methodUri': 'agora://DSPMethods_mgatzen/Automop/5', 'sourceRepo': 'agora'
+            'methodUri': 'agora://DSPMethods_mgatzen/Automop/6', 'sourceRepo': 'agora'
             },
         'name': 'Automop',
         'namespace': 'DSPMethods_mgatzen',
@@ -87,7 +87,7 @@ def submit_automop_job(workspace, user):
             'Mop.workspace_name': f'"{workspace_name}"'
         },
         'outputs': {},
-        'methodConfigVersion': 5,
+        'methodConfigVersion': 6,
         'deleted': False
     }
     result = fapi.create_workspace_config(workspace_namespace, workspace_name, method)
