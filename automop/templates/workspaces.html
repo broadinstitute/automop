@@ -55,7 +55,7 @@
 
 {% block content %}
 <h3>Mop Workspaces</h3>
-<p>You're logged in as <b>{{user}}</b>.</p>
+<p>You're logged in as <b>{{user}}</b>. This information was obtained by using your <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a>.</p>
 <form action="/mop" method="post">
     <div id="loading_div">
         <span>Loading your workspaces...</span><div id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>

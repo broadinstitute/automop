@@ -13,16 +13,8 @@ import firecloud.api as fapi
 import webbrowser
 import threading
 import os
-import subprocess
-
 
 app = flask.Flask(__name__)
-
-class ShutdownEvent:
-    def __init__(self, msg):
-        self.msg = msg
-    def __str__(self):
-        return self.msg
 
 def get_user_email():
     authorized_session = AuthorizedSession(google.auth.default(['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'])[0])
@@ -33,7 +25,8 @@ def get_user_email():
 def index():
     try:
         session['user'] = get_user_email()
-    except:
+    except Exception as e:
+        app.logger.error(str(e))
         return render_template('error.html', error_message=Markup(
             'Something went wrong verifying your Google credentials. Make sure you have valid <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a>, ' +
             'usually this done by running <pre>gcloud auth application-default login</pre> in your terminal.'))
@@ -42,7 +35,7 @@ def index():
 def get_workspace_cost(workspace):
     result = fapi.get_storage_cost(workspace[0], workspace[1])
     if not result.ok:
-        app.logger.error(f'Failed to get workspace cost for {workspace[0]}/{workspace[1]}: {result.json()["message"]}')
+        app.logger.warning(f'Failed to get workspace cost for {workspace[0]}/{workspace[1]}: {result.json()["message"]}')
         return 'N/A'
     return result.json()['estimate']
 
