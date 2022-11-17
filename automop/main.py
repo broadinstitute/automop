@@ -42,11 +42,11 @@ def get_workspace_cost(workspace):
 @app.route('/get_workspaces')
 async def get_workspaces():
     all_workspaces = fapi.list_workspaces().json()
-    writer_workspaces = [(workspace['workspace']['namespace'], workspace['workspace']['name']) for workspace in all_workspaces if workspace['accessLevel'] == 'WRITER' or workspace['accessLevel'] == 'OWNER']
+    writer_workspaces = [(workspace['workspace']['namespace'], workspace['workspace']['name']) for workspace in all_workspaces if workspace['accessLevel'] == 'OWNER']
 
     workspace_costs = None
 
-    with ThreadPoolExecutor(max_workers=10000) as executor:
+    with ThreadPoolExecutor(max_workers=50) as executor:
         loop = asyncio.get_event_loop()
         tasks = [loop.run_in_executor(executor, get_workspace_cost, workspace) for workspace in writer_workspaces]
         workspace_costs = [cost for cost in await asyncio.gather(*tasks)]
@@ -102,7 +102,7 @@ async def mop():
     if 'user' not in session:
         return render_template('error.html', error_message=Markup('The user email was not found in the session. Try navigating to the <a href="/">homepage</a>, which will set this variable.'))
     
-    with ThreadPoolExecutor(max_workers=10000) as executor:
+    with ThreadPoolExecutor(max_workers=50) as executor:
         loop = asyncio.get_event_loop()
         tasks = [loop.run_in_executor(executor, submit_automop_job, *(workspace, session['user'])) for workspace in workspaces_to_mop]
         submission_results = [result for result in await asyncio.gather(*tasks)]
