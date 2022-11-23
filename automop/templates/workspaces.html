@@ -12,13 +12,11 @@
                     for (var i = 0, length = boxes.length; i < length; i++) {
                         console.log(boxes[i]);
                         boxes[i].MaterialCheckbox.check();
-                        //boxes[i].MaterialCheckbox.updateClasses();
                     }
                 } else {
                     for (var i = 0, length = boxes.length; i < length; i++) {
                         console.log(boxes[i]);
                         boxes[i].MaterialCheckbox.uncheck();
-                        //boxes[i].MaterialCheckbox.updateClasses();
                     }
                 }
             };
@@ -38,7 +36,7 @@
                                     </label>
                             </td>
                             <td class="mdl-data-table__cell--non-numeric">${workspace.namespace}</td>
-                            <td class="mdl-data-table__cell--non-numeric">${workspace.name}</td>
+                            <td class="mdl-data-table__cell--non-numeric"><a href="https://app.terra.bio/#workspaces/${workspace.namespace}/${workspace.name}">${workspace.name}</a></td>
                             <td class="mdl-data-table__cell--non-numeric">${workspace.cost}</td>
                         </tr>`;
                 }
@@ -52,6 +50,8 @@
 {% endblock %}
 
 {% block title %}Workspaces{% endblock %}
+
+{% block extra_body_args %}onload="loadWorkspaces()"{% endblock %}
 
 {% block content %}
 <h3>Mop Workspaces</h3>

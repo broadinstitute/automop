@@ -85,14 +85,15 @@ def submit_automop_job(workspace, user):
     }
     result = fapi.create_workspace_config(workspace_namespace, workspace_name, method)
     if not result.ok:
-        return result.json()['message']
-    result = fapi.create_submission(workspace_namespace, workspace_name, 'DSPMethods_mgatzen', 'Automop')
+        return False, result.json()['message']
+    result = fapi.create_submission(workspace_namespace, workspace_name, 'DSPMethods_mgatzen', 'Automop', use_callcache=False, delete_intermediate_output_files=True)
     if not result.ok:
-        return result.json()['message']
+        return False, result.json()['message']
+    submission_id = result.json()['submissionId']
     result = fapi.delete_workspace_config(workspace_namespace, workspace_name, 'DSPMethods_mgatzen', 'Automop')
     if not result.ok:
-        return result.json()['message']
-    return 'OK'
+        return False, result.json()['message']
+    return True, submission_id
 
 
 @app.route('/mop', methods=['POST'])
@@ -110,11 +111,15 @@ async def mop():
     mop_results = []
     all_ok = True
     for i in range(len(workspaces_to_mop)):
-        if submission_results[i] != 'OK':
+        if submission_results[i][0]:
+            status_cell = Markup(f'<a target="_blank" rel="noopener noreferrer" href="https://app.terra.bio/#workspaces/{workspaces_to_mop[i][0]}/{workspaces_to_mop[i][1]}/job_history/{submission_results[i][1]}">View submission</a>')
+        else:
             all_ok = False
-        mop_results.append({'workspace_namespace': workspaces_to_mop[i][0], 'workspace_name': workspaces_to_mop[i][1], 'status': submission_results[i]})
+            status_cell = Markup(f'<span style="color: red;">{submission_results[i][1]}</span>')
+        
+        mop_results.append({'workspace_namespace': workspaces_to_mop[i][0], 'workspace_name': workspaces_to_mop[i][1], 'status': status_cell})
     if all_ok:
-        return render_template('mop.html', mop_status='All mop jobs submitted successfully.', finished_message=Markup('<p>You can now close this tab and terminate the app by pressing <code>Control + C</code> in the command line.</p>'), mop_results=mop_results)
+        return render_template('mop.html', mop_status='All mop jobs submitted successfully.', finished_message=Markup('You can now close this tab and terminate the app by pressing <code>Control + C</code> in the command line.'), mop_results=mop_results)
     else:
         return render_template('mop.html', mop_status='There have been errors submitting the mop jobs:', finished_message=Markup('If the cause is not obvious, please send the error messages shown below to <a href="mailto:mgatzen@broadinstitute.org">mgatzen@broadinstitute.org</a>.'), mop_results=mop_results)
 
