@@ -1,3 +1,4 @@
+import argparse
 import json
 import flask
 from flask import render_template, jsonify, request, session, redirect
@@ -123,15 +124,26 @@ async def mop():
     else:
         return render_template('mop.html', mop_status='There have been errors submitting the mop jobs:', finished_message=Markup('If the cause is not obvious, please send the error messages shown below to <a href="mailto:mgatzen@broadinstitute.org">mgatzen@broadinstitute.org</a>.'), mop_results=mop_results)
 
-def open_browser():
-    webbrowser.open_new('http://127.0.0.1:8080')
+def open_browser(host, port):
+    print("Starting local web browser")
+    url = f'http://{host}:{port}'
+    webbrowser.open_new(url)
+
+def get_cli():
+    parser = argparse.ArgumentParser(prog='automop-webui', description='Automop Web UI')
+    parser.add_argument('--host', default='127.0.0.1', help='IP address for webserver to listen on')
+    parser.add_argument('--port', default=8080, type=int, help='port for webserver to listen on')
+    parser.add_argument('--no-browser', action="store_true", default=False, help='Do not automatically open a web browser')
+    return parser.parse_args()
 
 def main():
+    args = get_cli()
     with open(os.path.join(app.root_path, 'secrets.json')) as secrets_file:
         secret_data = json.load(secrets_file)
     app.secret_key = secret_data['flask_secret_key']
-    threading.Timer(1, open_browser).start()
-    app.run('localhost', 8080, debug=True, use_reloader=False)
+    if not args.no_browser:
+        threading.Timer(1, open_browser, args=(args.host, args.port)).start()
+    app.run(args.host, args.port, debug=True, use_reloader=False)
 
 if __name__ == '__main__':
     main()

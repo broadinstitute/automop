@@ -1,0 +1,30 @@
+[project]
+name = "automop"
+description = "Automop web tool"
+authors = [
+    {name = "Michael Gatzen", email="mgatzen@broadinstitute.org"}
+]
+requires-python = ">=3.7"
+version = "0.0.1"
+dependencies = [
+    "Flask[async]==2.0.2",
+    "gunicorn==20.1.0",
+    "google-api-python-client",
+    "google-auth",
+    "google-auth-oauthlib",
+    "google-auth-httplib2",
+    "requests",
+    "firecloud",
+    "virtualenv",
+    "google-cloud-firestore",
+]
+
+[tool.setuptools.packages.find]
+include = ["automop"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+automop-webui = "automop.main:main"
