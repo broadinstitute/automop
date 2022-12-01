@@ -25,6 +25,7 @@ task MopTask {
         set -xeuo pipefail
         
         cat <<'EOF' > script.py
+import subprocess
 from datetime import datetime
 from google.cloud import bigquery
 import pytz
