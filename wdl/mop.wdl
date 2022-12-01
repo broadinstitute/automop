@@ -5,12 +5,14 @@ workflow Mop {
         String workspace_namespace
         String workspace_name
         String user
+        Boolean dry_run
     }
     call MopTask {
         input:
             workspace_namespace = workspace_namespace,
             workspace_name = workspace_name,
-            user = user
+            user = user,
+            dry_run = dry_run
     }
 }
 
@@ -19,6 +21,7 @@ task MopTask {
         String workspace_namespace
         String workspace_name
         String user
+        Boolean dry_run
     }
     
     command <<<
@@ -33,7 +36,7 @@ import pytz
 def main(workspace_namespace, workspace_name, user):
     units = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
 
-    mop_process = subprocess.Popen(['fissfc', 'mop', '-w', workspace_name, '-p', workspace_namespace, '--dry-run'],
+    mop_process = subprocess.Popen(['fissfc', 'mop', '-w', workspace_name, '-p', workspace_namespace~{if dry_run then ", '--dry-run'" else ""}],
         stdout=subprocess.PIPE)
     for line in iter(mop_process.stdout.readline, b''):
         line = line.decode()
@@ -64,9 +67,5 @@ EOF
         preemptible: 0
         memory: "16 GB"
         disks: "local-disk 20 HDD"
-    }
-    output {
-        File stdout = stdout()
-        File stderr = stderr()
     }
 }

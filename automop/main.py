@@ -17,6 +17,8 @@ import os
 
 app = flask.Flask(__name__)
 
+DRY_RUN = False
+
 def get_user_email_and_groups():
     authorized_session = AuthorizedSession(google.auth.default(['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'])[0])
     authorized_session.get('https://api.firecloud.org/api/health')
@@ -92,19 +94,20 @@ def submit_automop_job(workspace, user):
     method = {
         'methodRepoMethod': {
             'methodName': 'Automop',
-            'methodVersion': 8,
+            'methodVersion': 9,
             'methodNamespace': 'DSPMethods_mgatzen',
-            'methodUri': 'agora://DSPMethods_mgatzen/Automop/8', 'sourceRepo': 'agora'
+            'methodUri': 'agora://DSPMethods_mgatzen/Automop/9', 'sourceRepo': 'agora'
             },
         'name': 'Automop',
         'namespace': 'DSPMethods_mgatzen',
         'inputs': {
             'Mop.user': f'"{user}"',
             'Mop.workspace_namespace': f'"{workspace_namespace}"',
-            'Mop.workspace_name': f'"{workspace_name}"'
+            'Mop.workspace_name': f'"{workspace_name}"',
+            'Mop.dry_run': 'true' if DRY_RUN else 'false',
         },
         'outputs': {},
-        'methodConfigVersion': 8,
+        'methodConfigVersion': 9,
         'deleted': False
     }
     result = fapi.create_workspace_config(workspace_namespace, workspace_name, method)
