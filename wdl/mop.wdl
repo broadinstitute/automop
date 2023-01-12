@@ -36,7 +36,7 @@ import pytz
 def main(workspace_namespace, workspace_name, user):
     units = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
 
-    mop_process = subprocess.Popen(['fissfc', 'mop', '-w', workspace_name, '-p', workspace_namespace~{if dry_run then ", '--dry-run'" else ""}],
+    mop_process = subprocess.Popen(['fissfc', '--verbose', 'mop', '-w', workspace_name, '-p', workspace_namespace~{if dry_run then ", '--dry-run'" else ""}],
         stdout=subprocess.PIPE)
     for line in iter(mop_process.stdout.readline, b''):
         line = line.decode()
