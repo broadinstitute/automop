@@ -53,7 +53,7 @@ def main(workspace_namespace, workspace_name, user):
             'size_deleted': size_in_bytes
         }
     db = bigquery.Client(project='broad-dsde-methods-automop')
-    db.insert_rows(db.get_table('broad-dsde-methods-automop.automop_test.mop_events'), [mop_event])
+    db.insert_rows(db.get_table('broad-dsde-methods-automop.automop.mop_events'), [mop_event])
 
 
 if __name__ == '__main__':
