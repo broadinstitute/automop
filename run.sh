@@ -10,7 +10,7 @@ if [ ! -d $venv_path ]; then
     pip install -U pip
 fi
 
-echo ${venv_path}/bin/activate
+source ${venv_path}/bin/activate
 
 if [ ! -f $automop_exe ]; then
     echo "Installing automop in virtual env"
