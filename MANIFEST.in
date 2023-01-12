@@ -1,0 +1,3 @@
+include automop/*.json
+include automop/static/*
+include automop/templates/*
