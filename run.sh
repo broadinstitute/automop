@@ -12,9 +12,9 @@ fi
 
 source ${venv_path}/bin/activate
 
-if [ ! -f $automop_exe ]; then
-    echo "Installing automop in virtual env"
-    pip install .
-fi
+#if [ ! -f $automop_exe ]; then
+#    echo "Installing automop in virtual env"
+pip install .
+#fi
 
 $automop_exe $*
