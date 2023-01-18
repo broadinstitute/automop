@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Missing Group Access{% endblock %}
+
+{% block content %}
+<h3>Missing Group Access</h3>
+<p>In order to use this tool, you need access to the <code>automop_users@firecloud.org</code> Terra group. If you are a member of DSP Methods then you should be a member of that group. In case you are not, please click the button below to request access. Unfortunately, this currently needs to be manually approved, so it may take a while for that to take effect.</p>
+<form action="/request_group_access" method="get"><button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">Request Group Access</button></form>
+<br />
+<p>You're logged in as <b>{{user}}</b>. This information was obtained by using your <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a>.</p>
+<p>If you have any questions, please email or slack <a href="mailto:mgatzen@broadinstitute.org">mgatzen@broadinstitute.org</a>.</p>
+{% endblock %}

@@ -17,21 +17,46 @@ import os
 
 app = flask.Flask(__name__)
 
-def get_user_email():
+DRY_RUN = False
+
+def get_user_email_and_groups():
     authorized_session = AuthorizedSession(google.auth.default(['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'])[0])
     authorized_session.get('https://api.firecloud.org/api/health')
-    return id_token.verify_oauth2_token(authorized_session.credentials.id_token, Request(session=authorized_session), clock_skew_in_seconds=10)['email']
+    email = id_token.verify_oauth2_token(authorized_session.credentials.id_token, Request(session=authorized_session), clock_skew_in_seconds=10)['email']
+    groups = fapi.get_groups().json()
+    return email, groups
 
 @app.route('/')
 def index():
     try:
-        session['user'] = get_user_email()
+        email, groups = get_user_email_and_groups()
     except Exception as e:
         app.logger.error(str(e))
         return render_template('error.html', error_message=Markup(
             'Something went wrong verifying your Google credentials. Make sure you have valid <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a>, ' +
             'usually this done by running <pre>gcloud auth application-default login</pre> in your terminal.'))
+    session['user'] = email
+
+    if not any([group['groupEmail'] == 'automop_users@firecloud.org' for group in groups]):
+        return redirect('/missing_group_access')
+
     return redirect('/workspaces')
+
+@app.route('/missing_group_access')
+def missing_group_access():
+    return render_template('missing_group_access.html', user=session['user'])
+
+@app.route('/request_group_access')
+def request_group_access():
+    error_message = Markup('Something went wrong requesting group access. Please slack or email <a href="mgatzen@broadinstitute.org">mgatzen@broadinstitute.org</a> with the error message shown in the console.')
+    try:
+        fapi_response = fapi.request_access_to_group('automop_users')
+        if not fapi_response.ok:
+            app.logger.warning(fapi_response.json()["message"])
+            return render_template('error.html', error_message=error_message)
+    except Exception as e:
+        return render_template('error.html', error_message=error_message)
+    return render_template('requested_group_access.html')
 
 def get_workspace_cost(workspace):
     result = fapi.get_storage_cost(workspace[0], workspace[1])
@@ -69,19 +94,20 @@ def submit_automop_job(workspace, user):
     method = {
         'methodRepoMethod': {
             'methodName': 'Automop',
-            'methodVersion': 6,
+            'methodVersion': 11,
             'methodNamespace': 'DSPMethods_mgatzen',
-            'methodUri': 'agora://DSPMethods_mgatzen/Automop/6', 'sourceRepo': 'agora'
+            'methodUri': 'agora://DSPMethods_mgatzen/Automop/11', 'sourceRepo': 'agora'
             },
         'name': 'Automop',
         'namespace': 'DSPMethods_mgatzen',
         'inputs': {
             'Mop.user': f'"{user}"',
             'Mop.workspace_namespace': f'"{workspace_namespace}"',
-            'Mop.workspace_name': f'"{workspace_name}"'
+            'Mop.workspace_name': f'"{workspace_name}"',
+            'Mop.dry_run': 'true' if DRY_RUN else 'false',
         },
         'outputs': {},
-        'methodConfigVersion': 6,
+        'methodConfigVersion': 11,
         'deleted': False
     }
     result = fapi.create_workspace_config(workspace_namespace, workspace_name, method)
