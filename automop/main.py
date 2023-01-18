@@ -125,7 +125,13 @@ def submit_automop_job(workspace, user):
 
 @app.route('/mop', methods=['POST'])
 async def mop():
-    workspaces_to_mop = [tuple(workspace_and_checkbox[0].split('/')) for workspace_and_checkbox in request.form.items() if workspace_and_checkbox[1] == 'on']
+    if 'delete_files' not in request.form or request.form['delete_files'] != 'on':
+        return render_template('error.html', error_message=Markup('The confirmation checkbox on the previous page was not checked. Please make sure that you want to permanently delete files using this mop tool.'))
+    
+    workspaces_to_mop = [tuple(workspace_and_checkbox[0].split('/')[1:]) for workspace_and_checkbox in request.form.items() if workspace_and_checkbox[0].startswith('mop_workspace/') and workspace_and_checkbox[1] == 'on']
+
+    if len(workspaces_to_mop) == 0:
+        return render_template('error.html', error_message=Markup('No workspaces were selected to be mopped. Please select at least one workspace.'))
 
     if 'user' not in session:
         return render_template('error.html', error_message=Markup('The user email was not found in the session. Try navigating to the <a href="/">homepage</a>, which will set this variable.'))
