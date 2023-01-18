@@ -52,9 +52,11 @@ def main(workspace_namespace, workspace_name, user):
                 size_found = True
             if line.startswith('No files to mop in'):
                 size_in_bytes = 0
+                print('No files to mop.')
                 size_found = True
                 run_successful = True
             if line.startswith('Operation completed over'):
+                print('Mopping complete!')
                 run_successful = True
     
     if not size_found:
