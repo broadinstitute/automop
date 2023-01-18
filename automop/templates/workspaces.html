@@ -31,8 +31,8 @@
                     newRow.innerHTML = `
                         <tr>
                             <td>
-                                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="${workspace.namespace}/${workspace.name}">
-                                        <input type="checkbox" id="${workspace.namespace}/${workspace.name}" name="${workspace.namespace}/${workspace.name}" class="mdl-checkbox__input" />
+                                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="mop_workspace/${workspace.namespace}/${workspace.name}">
+                                        <input type="checkbox" id="mop_workspace/${workspace.namespace}/${workspace.name}" name="mop_workspace/${workspace.namespace}/${workspace.name}" class="mdl-checkbox__input" />
                                     </label>
                             </td>
                             <td class="mdl-data-table__cell--non-numeric">${workspace.namespace}</td>
@@ -42,10 +42,13 @@
                 }
                 componentHandler.upgradeAllRegistered();
                 document.getElementById('loading_div').remove();
-                document.getElementById("mop_button").disabled = false;
+                document.getElementById("mop_guidelines").style.display = 'block';
                 registerCheckboxes()
             })
-    }    
+    }
+    function handleConfirmationCheckboxClick(checkbox) {
+        document.getElementById('mop_button').disabled = !checkbox.checked;
+    }
 </script>
 {% endblock %}
 
@@ -60,7 +63,21 @@
     <div id="loading_div">
         <span>Loading your workspaces...</span><div id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
     </div>
-    <br /><button id="mop_button" type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" disabled>Mop selected workspaces</button>
+    <div id="mop_guidelines" style="display: none;">
+        <ol>
+            <li>Do not mop workspaces if you don't know what this means.</li>
+            <li>The workspaces listed below include all workspaces you are an owner of. Note that other users may also be working with these workspaces, and mopping will remove their ability to access mopped data. <b>Only mop workspaces for which you know mopping will not create problems for other users. If you aren't sure about a workspace, do not mop it!</b></li>
+            <li><b>Mopping will delete data.</b> It will not delete any files outside the <code>submissions</code> directory nor any files referenced in a workspace data table. However, when mopping a workspace, consider how you would feel if the entire workspace bucket were deleted. If this would be a significant problem, you should be very careful to make sure all the data you need is referenced in a workspace data table, and may not want to mop the workspace at all. If you are using outputs from workflows that you don't write into the data tables then <b>these outputs will be lost.</b></li>
+        </ol>
+        <br />
+        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="delete_files">
+            <input type="checkbox" id="delete_files" name="delete_files" class="mdl-checkbox__input" onclick="handleConfirmationCheckboxClick(this);" />
+            <span class="mdl-checkbox__label" style="color: #ff6f00;">I have read the information above and I know that mopping workspaces <b>will permanently delete data</b>.</span>
+        </label>
+        <br />
+        <br />
+        <button id="mop_button" type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color--amber-900" disabled>Mop selected workspaces</button>
+    </div>
     <br />
     <br />
     <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">

@@ -36,14 +36,34 @@ import pytz
 def main(workspace_namespace, workspace_name, user):
     units = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
 
-    mop_process = subprocess.Popen(['fissfc', '--verbose', 'mop', '-w', workspace_name, '-p', workspace_namespace~{if dry_run then ", '--dry-run'" else ""}],
+    mop_process = subprocess.Popen(['fissfc', '--yes', '--verbose', 'mop', '-w', workspace_name, '-p', workspace_namespace~{if dry_run then ", '--dry-run'" else ""}],
         stdout=subprocess.PIPE)
-    for line in iter(mop_process.stdout.readline, b''):
-        line = line.decode()
-        if line.startswith('Total Size: '):
-            size_with_unit = line.rstrip()[12:]
-            size, unit = size_with_unit.split(' ')
-            size_in_bytes = int(float(size) * 1024 ** units.index(unit))
+    
+    size_found = False
+    run_successful = False
+    with open('fissfc_log.log', 'w') as fissfc_log:
+        for line in iter(mop_process.stdout.readline, b''):
+            line = line.decode()
+            fissfc_log.write(line)
+            if line.startswith('Total Size: '):
+                size_with_unit = line.rstrip()[12:]
+                size, unit = size_with_unit.split(' ')
+                size_in_bytes = int(float(size) * 1024 ** units.index(unit))
+                size_found = True
+            if line.startswith('No files to mop in'):
+                size_in_bytes = 0
+                print('No files to mop.')
+                size_found = True
+                run_successful = True
+            if line.startswith('Operation completed over'):
+                print('Mopping complete!')
+                run_successful = True
+    
+    if not size_found:
+        raise RuntimeError('No total deleted size found in fissfc output.')
+    
+    if not run_successful:
+        raise RuntimeError('Did not receive "Operation completed" message from fissfc output.')
     
     mop_event = {
             'user': user,
@@ -61,6 +81,10 @@ if __name__ == '__main__':
 EOF
         python script.py
     >>>
+
+    output {
+        File fissfc_log = "fissfc_log.log"
+    }
     
     runtime {
         docker: "us.gcr.io/broad-dsde-methods/automop:0.1"
