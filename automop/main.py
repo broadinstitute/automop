@@ -68,7 +68,7 @@ def get_workspace_cost(workspace):
 @app.route('/get_workspaces')
 async def get_workspaces():
     all_workspaces = fapi.list_workspaces().json()
-    writer_workspaces = [(workspace['workspace']['namespace'], workspace['workspace']['name']) for workspace in all_workspaces if workspace['accessLevel'] == 'OWNER']
+    writer_workspaces = [(workspace['workspace']['namespace'], workspace['workspace']['name']) for workspace in all_workspaces if workspace['accessLevel'] == 'OWNER' or workspace['accessLevel'] == 'PROJECT_OWNER']
 
     workspace_costs = None
 
