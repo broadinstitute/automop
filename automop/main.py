@@ -78,8 +78,8 @@ async def get_workspaces():
         workspace_costs = [cost for cost in await asyncio.gather(*tasks)]
     
     workspaces_json = [{'namespace': writer_workspaces[i][0], 'name': writer_workspaces[i][1], 'cost': workspace_costs[i]} for i in range(len(writer_workspaces))]
-    
-    return jsonify(sorted(workspaces_json, key=lambda workspace: float('+inf') if workspace['cost'] == 'N/A' else float(workspace['cost'][1:])))
+
+    return jsonify(sorted(workspaces_json, key=lambda workspace: float('+inf') if workspace['cost'] == 'N/A' else float(workspace['cost'])))
 
 @app.route('/workspaces')
 def workspaces():
